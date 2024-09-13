@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--for stdio-->
+  <link rel="stylesheet" href="xterm/xterm.css" />
+  <script src="xterm/xterm.js"></script>
+  <!--for stdio-->
+
+  <script src="./bin/index.js" type="text/javascript"></script>
+  <style>
+    #stderr {
+      color: darkred;
+    }
+
+    #stdout,
+    #stderr {
+      display: none;
+    }
+
+    body {
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      display: grid;
+      grid-template-rows: 3em auto;
+    }
+
+    body>div:first-child {
+      color: lightgray;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+    }
+
+    a,
+    a:visited {
+      color: cornflowerblue;
+      text-decoration: none;
+    }
+
+    body>* {
+      border: 1em solid transparent;
+    }
+
+    #xterm {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+
+<body ondrop="drop_handler(event)" ondragover="dragover_handler(event)" onload="load()">
+  <div>Node.js 8.0.0 bootstrapped in your browser. Experimental. Have fun.
+    <a href="https://blog.cloudboost.io/how-to-run-node-js-apps-in-the-browser-3f077f34f8a5">Blog post</a>.
+    <a href="https://github.com/olydis/node-in-browser">Contribute</a>.
+  </div>
+  <div id="xterm"></div>
+
+  <!-- for Electron tests -->
+  <pre id="stdout"></pre>
+  <pre id="stderr"></pre>
+</body>
+
+</html>
