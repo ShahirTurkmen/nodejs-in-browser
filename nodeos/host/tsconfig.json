@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "amd",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "skipLibCheck": true,
+    "outFile": "../../www/bin/index.js",
+    "sourceMap": false,
+    "strict": true,
+    "target": "ES2017",
+    "typeRoots": [
+      "xterm"
+    ],
+    "lib": [
+      "ES2017",
+      "dom",
+    ],
+    "newLine": "LF"
+  }
+}
