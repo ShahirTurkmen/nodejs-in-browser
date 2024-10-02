@@ -1,0 +1,12 @@
+{
+  "name": "node.box",
+  "short_name": "nodebox",
+  "version": "2.0",
+  "description": "Node Box",
+  "manifest_version": 3,
+  "permissions": [
+    "sockets"
+  ],
+  "homepage_url": "https://github.com/shahirturkmen/nodejs-in-browser/tree/main"
+  
+}
