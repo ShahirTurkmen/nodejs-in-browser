@@ -4,6 +4,20 @@
   // stack trace manipulation
   type StackFrame = { func?: string, file: string, line: number, column: number };
   type StackTrace = {};
+  function captureStackTrace(error: Error) {
+    const container = new Error(); // eslint-disable-line unicorn/error-message
+
+    Object.defineProperty(error, "stack", {
+      configurable: true,
+      get() {
+        const { stack } = container;
+        Object.defineProperty(this, "stack", { value: stack });
+        return stack;
+      },
+    });
+  }
+
+  Error.captureStackTrace = captureStackTrace;
   const getStackTrace = () => new Error().stack;
 
   const selfAny: any = self;
@@ -144,114 +158,116 @@
   selfAny.onmessage = function (msg: MessageEvent) {
     if (msg.data.type !== "start") return;
     env = msg.data.env;
-
     // BOOT
     const nativesKeys = [
-      'internal/bootstrap_node',
-      'async_hooks',
-      'assert',
-      'buffer',
-      'child_process',
-      'console',
-      'constants',
-      'crypto',
-      'cluster',
-      'dgram',
-      'dns',
-      'domain',
-      'events',
-      'fs',
-      'http',
-      '_http_agent',
-      '_http_client',
-      '_http_common',
-      '_http_incoming',
-      '_http_outgoing',
-      '_http_server',
-      'https',
-      'inspector',
-      'module',
-      'net',
-      'os',
-      'path',
-      'perf_hooks',
-      'process',
-      'punycode',
-      'querystring',
-      'readline',
-      'repl',
-      'stream',
-      '_stream_readable',
-      '_stream_writable',
-      '_stream_duplex',
-      '_stream_transform',
-      '_stream_passthrough',
-      '_stream_wrap',
-      'string_decoder',
-      'sys',
-      'timers',
-      'tls',
-      '_tls_common',
-      '_tls_legacy',
-      '_tls_wrap',
-      'tty',
-      'url',
-      'util',
-      'v8',
-      'vm',
-      'zlib',
-      'internal/buffer',
-      'internal/child_process',
-      'internal/cluster/child',
-      'internal/cluster/master',
-      'internal/cluster/round_robin_handle',
-      'internal/cluster/shared_handle',
-      'internal/cluster/utils',
-      'internal/cluster/worker',
-      // 'internal/crypto/certificate',
-      // 'internal/crypto/cipher',
-      // 'internal/crypto/diffiehellman',
-      // 'internal/crypto/hash',
-      // 'internal/crypto/pbkdf2',
-      // 'internal/crypto/random',
-      // 'internal/crypto/sig',
-      // 'internal/crypto/util',
-      'internal/encoding',
-      'internal/errors',
-      'internal/freelist',
-      'internal/fs',
-      'internal/http',
-      'internal/inspector_async_hook',
-      'internal/linkedlist',
-      'internal/loader/Loader',
-      'internal/loader/ModuleJob',
-      'internal/loader/ModuleMap',
-      'internal/loader/ModuleWrap',
-      'internal/loader/resolveRequestUrl',
-      'internal/loader/search',
-      'internal/net',
-      'internal/module',
-      'internal/os',
-      'internal/process',
-      'internal/process/next_tick',
-      'internal/process/promises',
-      'internal/process/stdio',
-      'internal/process/warning',
-      'internal/process/write-coverage',
-      'internal/querystring',
-      'internal/readline',
-      'internal/repl',
-      'internal/safe_globals',
-      'internal/socket_list',
-      'internal/test/unicode',
-      'internal/url',
-      'internal/util',
-      'internal/v8_prof_polyfill',
-      'internal/v8_prof_processor',
-      'internal/streams/lazy_transform',
-      'internal/streams/BufferList',
-      'internal/streams/legacy',
-      'internal/streams/destroy'
+      "internal/bootstrap_node",
+      "async_hooks",
+      "assert",
+      "buffer",
+      "child_process",
+      "console",
+      "constants",
+      "crypto",
+      "cluster",
+      "dgram",
+      "dns",
+      "domain",
+      "events",
+      "fs",
+      "fs.min",
+      "http",
+      "_http_agent",
+      "_http_client",
+      "_http_common",
+      "_http_incoming",
+      "_http_outgoing",
+      "_http_server",
+      "https",
+      "inspector",
+      "module",
+      "net",
+      "os",
+      "path",
+      "perf_hooks",
+      "process",
+      "punycode",
+      "querystring",
+      "readline",
+      "repl",
+      "stream",
+      "_stream_readable",
+      "_stream_writable",
+      "_stream_duplex",
+      "_stream_transform",
+      "_stream_passthrough",
+      "_stream_wrap",
+      "string_decoder",
+      "sys",
+      "timers",
+      "tls",
+      "_tls_common",
+      "_tls_legacy",
+      "_tls_wrap",
+      "tty",
+      "url",
+      "util",
+      "v8",
+      "vm",
+      "zlib",
+      "zlib.pretty",
+      "internal/buffer",
+      "internal/child_process",
+      "internal/cluster/child",
+      "internal/cluster/master",
+      "internal/cluster/round_robin_handle",
+      "internal/cluster/shared_handle",
+      "internal/cluster/utils",
+      "internal/cluster/worker",
+      "internal/crypto/certificate",
+      "internal/crypto/cipher",
+      "internal/crypto/diffiehellman",
+      "internal/crypto/hash",
+      "internal/crypto/pbkdf2",
+      "internal/crypto/random",
+      "internal/crypto/sig",
+      "internal/crypto/util",
+      "internal/tls",
+      "internal/encoding",
+      "internal/errors",
+      "internal/freelist",
+      "internal/fs",
+      "internal/http",
+      "internal/inspector_async_hook",
+      "internal/linkedlist",
+      "internal/loader/Loader",
+      "internal/loader/ModuleJob",
+      "internal/loader/ModuleMap",
+      "internal/loader/ModuleWrap",
+      "internal/loader/resolveRequestUrl",
+      "internal/loader/search",
+      "internal/net",
+      "internal/module",
+      "internal/os",
+      "internal/process",
+      "internal/process/next_tick",
+      "internal/process/promises",
+      "internal/process/stdio",
+      "internal/process/warning",
+      "internal/process/write-coverage",
+      "internal/querystring",
+      "internal/readline",
+      "internal/repl",
+      "internal/safe_globals",
+      "internal/socket_list",
+      "internal/test/unicode",
+      "internal/url",
+      "internal/util",
+      "internal/v8_prof_polyfill",
+      "internal/v8_prof_processor",
+      "internal/streams/lazy_transform",
+      "internal/streams/BufferList",
+      "internal/streams/legacy",
+      "internal/streams/destroy",
     ];
     const natives: { [name: string]: string } = {};
     for (const nativesKey of nativesKeys)
@@ -485,6 +501,7 @@
         return [0, 0];
       },
       argv: ["node", ...msg.data.args],
+      platform: "linux",
       binding: (name: string): any => {
         switch (name) {
           case "async_wrap":
@@ -532,7 +549,8 @@
                     this[i + offset] = string.charCodeAt(i);
                   return i;
                 };
-              }
+              },
+              kMaxLength: 2147483647
             }; // TODO
           case "cares_wrap":
             return {
@@ -547,7 +565,11 @@
               }
             };// TODO
           case "config":
-            return {}; // TODO
+            return {
+              hasIntel: true,
+              hasSmallICU: true,
+              icuDataDir:""
+            }; // TODO
           case "constants":
             return JSON.parse('{"os":{"UV_UDP_REUSEADDR":4,"errno":{"E2BIG":7,"EACCES":13,"EADDRINUSE":100,"EADDRNOTAVAIL":101,"EAFNOSUPPORT":102,"EAGAIN":11,"EALREADY":103,"EBADF":9,"EBADMSG":104,"EBUSY":16,"ECANCELED":105,"ECHILD":10,"ECONNABORTED":106,"ECONNREFUSED":107,"ECONNRESET":108,"EDEADLK":36,"EDESTADDRREQ":109,"EDOM":33,"EEXIST":17,"EFAULT":14,"EFBIG":27,"EHOSTUNREACH":110,"EIDRM":111,"EILSEQ":42,"EINPROGRESS":112,"EINTR":4,"EINVAL":22,"EIO":5,"EISCONN":113,"EISDIR":21,"ELOOP":114,"EMFILE":24,"EMLINK":31,"EMSGSIZE":115,"ENAMETOOLONG":38,"ENETDOWN":116,"ENETRESET":117,"ENETUNREACH":118,"ENFILE":23,"ENOBUFS":119,"ENODATA":120,"ENODEV":19,"ENOENT":2,"ENOEXEC":8,"ENOLCK":39,"ENOLINK":121,"ENOMEM":12,"ENOMSG":122,"ENOPROTOOPT":123,"ENOSPC":28,"ENOSR":124,"ENOSTR":125,"ENOSYS":40,"ENOTCONN":126,"ENOTDIR":20,"ENOTEMPTY":41,"ENOTSOCK":128,"ENOTSUP":129,"ENOTTY":25,"ENXIO":6,"EOPNOTSUPP":130,"EOVERFLOW":132,"EPERM":1,"EPIPE":32,"EPROTO":134,"EPROTONOSUPPORT":135,"EPROTOTYPE":136,"ERANGE":34,"EROFS":30,"ESPIPE":29,"ESRCH":3,"ETIME":137,"ETIMEDOUT":138,"ETXTBSY":139,"EWOULDBLOCK":140,"EXDEV":18,"WSAEINTR":10004,"WSAEBADF":10009,"WSAEACCES":10013,"WSAEFAULT":10014,"WSAEINVAL":10022,"WSAEMFILE":10024,"WSAEWOULDBLOCK":10035,"WSAEINPROGRESS":10036,"WSAEALREADY":10037,"WSAENOTSOCK":10038,"WSAEDESTADDRREQ":10039,"WSAEMSGSIZE":10040,"WSAEPROTOTYPE":10041,"WSAENOPROTOOPT":10042,"WSAEPROTONOSUPPORT":10043,"WSAESOCKTNOSUPPORT":10044,"WSAEOPNOTSUPP":10045,"WSAEPFNOSUPPORT":10046,"WSAEAFNOSUPPORT":10047,"WSAEADDRINUSE":10048,"WSAEADDRNOTAVAIL":10049,"WSAENETDOWN":10050,"WSAENETUNREACH":10051,"WSAENETRESET":10052,"WSAECONNABORTED":10053,"WSAECONNRESET":10054,"WSAENOBUFS":10055,"WSAEISCONN":10056,"WSAENOTCONN":10057,"WSAESHUTDOWN":10058,"WSAETOOMANYREFS":10059,"WSAETIMEDOUT":10060,"WSAECONNREFUSED":10061,"WSAELOOP":10062,"WSAENAMETOOLONG":10063,"WSAEHOSTDOWN":10064,"WSAEHOSTUNREACH":10065,"WSAENOTEMPTY":10066,"WSAEPROCLIM":10067,"WSAEUSERS":10068,"WSAEDQUOT":10069,"WSAESTALE":10070,"WSAEREMOTE":10071,"WSASYSNOTREADY":10091,"WSAVERNOTSUPPORTED":10092,"WSANOTINITIALISED":10093,"WSAEDISCON":10101,"WSAENOMORE":10102,"WSAECANCELLED":10103,"WSAEINVALIDPROCTABLE":10104,"WSAEINVALIDPROVIDER":10105,"WSAEPROVIDERFAILEDINIT":10106,"WSASYSCALLFAILURE":10107,"WSASERVICE_NOT_FOUND":10108,"WSATYPE_NOT_FOUND":10109,"WSA_E_NO_MORE":10110,"WSA_E_CANCELLED":10111,"WSAEREFUSED":10112},"signals":{"SIGHUP":1,"SIGINT":2,"SIGILL":4,"SIGABRT":22,"SIGFPE":8,"SIGKILL":9,"SIGSEGV":11,"SIGTERM":15,"SIGBREAK":21,"SIGWINCH":28}},"fs":{"O_RDONLY":0,"O_WRONLY":1,"O_RDWR":2,"S_IFMT":61440,"S_IFREG":32768,"S_IFDIR":16384,"S_IFCHR":8192,"S_IFLNK":40960,"O_CREAT":256,"O_EXCL":1024,"O_TRUNC":512,"O_APPEND":8,"F_OK":0,"R_OK":4,"W_OK":2,"X_OK":1},"crypto":{"SSL_OP_ALL":2147486719,"SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION":262144,"SSL_OP_CIPHER_SERVER_PREFERENCE":4194304,"SSL_OP_CISCO_ANYCONNECT":32768,"SSL_OP_COOKIE_EXCHANGE":8192,"SSL_OP_CRYPTOPRO_TLSEXT_BUG":2147483648,"SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS":2048,"SSL_OP_EPHEMERAL_RSA":0,"SSL_OP_LEGACY_SERVER_CONNECT":4,"SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER":32,"SSL_OP_MICROSOFT_SESS_ID_BUG":1,"SSL_OP_MSIE_SSLV2_RSA_PADDING":0,"SSL_OP_NETSCAPE_CA_DN_BUG":536870912,"SSL_OP_NETSCAPE_CHALLENGE_BUG":2,"SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG":1073741824,"SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG":8,"SSL_OP_NO_COMPRESSION":131072,"SSL_OP_NO_QUERY_MTU":4096,"SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION":65536,"SSL_OP_NO_SSLv2":16777216,"SSL_OP_NO_SSLv3":33554432,"SSL_OP_NO_TICKET":16384,"SSL_OP_NO_TLSv1":67108864,"SSL_OP_NO_TLSv1_1":268435456,"SSL_OP_NO_TLSv1_2":134217728,"SSL_OP_PKCS1_CHECK_1":0,"SSL_OP_PKCS1_CHECK_2":0,"SSL_OP_SINGLE_DH_USE":1048576,"SSL_OP_SINGLE_ECDH_USE":524288,"SSL_OP_SSLEAY_080_CLIENT_DH_BUG":128,"SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG":0,"SSL_OP_TLS_BLOCK_PADDING_BUG":512,"SSL_OP_TLS_D5_BUG":256,"SSL_OP_TLS_ROLLBACK_BUG":8388608,"ENGINE_METHOD_RSA":1,"ENGINE_METHOD_DSA":2,"ENGINE_METHOD_DH":4,"ENGINE_METHOD_RAND":8,"ENGINE_METHOD_ECDH":16,"ENGINE_METHOD_ECDSA":32,"ENGINE_METHOD_CIPHERS":64,"ENGINE_METHOD_DIGESTS":128,"ENGINE_METHOD_STORE":256,"ENGINE_METHOD_PKEY_METHS":512,"ENGINE_METHOD_PKEY_ASN1_METHS":1024,"ENGINE_METHOD_ALL":65535,"ENGINE_METHOD_NONE":0,"DH_CHECK_P_NOT_SAFE_PRIME":2,"DH_CHECK_P_NOT_PRIME":1,"DH_UNABLE_TO_CHECK_GENERATOR":4,"DH_NOT_SUITABLE_GENERATOR":8,"NPN_ENABLED":1,"ALPN_ENABLED":1,"RSA_PKCS1_PADDING":1,"RSA_SSLV23_PADDING":2,"RSA_NO_PADDING":3,"RSA_PKCS1_OAEP_PADDING":4,"RSA_X931_PADDING":5,"RSA_PKCS1_PSS_PADDING":6,"RSA_PSS_SALTLEN_DIGEST":-1,"RSA_PSS_SALTLEN_MAX_SIGN":-2,"RSA_PSS_SALTLEN_AUTO":-2,"POINT_CONVERSION_COMPRESSED":2,"POINT_CONVERSION_UNCOMPRESSED":4,"POINT_CONVERSION_HYBRID":6,"defaultCoreCipherList":"ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA","defaultCipherList":"ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA"},"zlib":{"Z_NO_FLUSH":0,"Z_PARTIAL_FLUSH":1,"Z_SYNC_FLUSH":2,"Z_FULL_FLUSH":3,"Z_FINISH":4,"Z_BLOCK":5,"Z_OK":0,"Z_STREAM_END":1,"Z_NEED_DICT":2,"Z_ERRNO":-1,"Z_STREAM_ERROR":-2,"Z_DATA_ERROR":-3,"Z_MEM_ERROR":-4,"Z_BUF_ERROR":-5,"Z_VERSION_ERROR":-6,"Z_NO_COMPRESSION":0,"Z_BEST_SPEED":1,"Z_BEST_COMPRESSION":9,"Z_DEFAULT_COMPRESSION":-1,"Z_FILTERED":1,"Z_HUFFMAN_ONLY":2,"Z_RLE":3,"Z_FIXED":4,"Z_DEFAULT_STRATEGY":0,"ZLIB_VERNUM":4784,"DEFLATE":1,"INFLATE":2,"GZIP":3,"GUNZIP":4,"DEFLATERAW":5,"INFLATERAW":6,"UNZIP":7,"Z_MIN_WINDOWBITS":8,"Z_MAX_WINDOWBITS":15,"Z_DEFAULT_WINDOWBITS":15,"Z_MIN_CHUNK":64,"Z_MAX_CHUNK":null,"Z_DEFAULT_CHUNK":16384,"Z_MIN_MEMLEVEL":1,"Z_MAX_MEMLEVEL":9,"Z_DEFAULT_MEMLEVEL":8,"Z_MIN_LEVEL":-1,"Z_MAX_LEVEL":9,"Z_DEFAULT_LEVEL":-1}}');
           case "contextify":
@@ -817,6 +839,8 @@
               errname: function () { return `errname(${arguments})`; },
               UV_E2BIG: -4093, UV_EACCES: -4092, UV_EADDRINUSE: -4091, UV_EADDRNOTAVAIL: -4090, UV_EAFNOSUPPORT: -4089, UV_EAGAIN: -4088, UV_EAI_ADDRFAMILY: -3000, UV_EAI_AGAIN: -3001, UV_EAI_BADFLAGS: -3002, UV_EAI_BADHINTS: -3013, UV_EAI_CANCELED: -3003, UV_EAI_FAIL: -3004, UV_EAI_FAMILY: -3005, UV_EAI_MEMORY: -3006, UV_EAI_NODATA: -3007, UV_EAI_NONAME: -3008, UV_EAI_OVERFLOW: -3009, UV_EAI_PROTOCOL: -3014, UV_EAI_SERVICE: -3010, UV_EAI_SOCKTYPE: -3011, UV_EALREADY: -4084, UV_EBADF: -4083, UV_EBUSY: -4082, UV_ECANCELED: -4081, UV_ECHARSET: -4080, UV_ECONNABORTED: -4079, UV_ECONNREFUSED: -4078, UV_ECONNRESET: -4077, UV_EDESTADDRREQ: -4076, UV_EEXIST: -4075, UV_EFAULT: -4074, UV_EFBIG: -4036, UV_EHOSTUNREACH: -4073, UV_EINTR: -4072, UV_EINVAL: -4071, UV_EIO: -4070, UV_EISCONN: -4069, UV_EISDIR: -4068, UV_ELOOP: -4067, UV_EMFILE: -4066, UV_EMSGSIZE: -4065, UV_ENAMETOOLONG: -4064, UV_ENETDOWN: -4063, UV_ENETUNREACH: -4062, UV_ENFILE: -4061, UV_ENOBUFS: -4060, UV_ENODEV: -4059, UV_ENOENT: -4058, UV_ENOMEM: -4057, UV_ENONET: -4056, UV_ENOPROTOOPT: -4035, UV_ENOSPC: -4055, UV_ENOSYS: -4054, UV_ENOTCONN: -4053, UV_ENOTDIR: -4052, UV_ENOTEMPTY: -4051, UV_ENOTSOCK: -4050, UV_ENOTSUP: -4049, UV_EPERM: -4048, UV_EPIPE: -4047, UV_EPROTO: -4046, UV_EPROTONOSUPPORT: -4045, UV_EPROTOTYPE: -4044, UV_ERANGE: -4034, UV_EROFS: -4043, UV_ESHUTDOWN: -4042, UV_ESPIPE: -4041, UV_ESRCH: -4040, UV_ETIMEDOUT: -4039, UV_ETXTBSY: -4038, UV_EXDEV: -4037, UV_UNKNOWN: -4094, UV_EOF: -4095, UV_ENXIO: -4033, UV_EMLINK: -4032, UV_EHOSTDOWN: -4031
             }
+          case "zlib":
+            return;
           default:
             throw new Error(`missing binding '${name}'`);
         }
@@ -833,7 +857,7 @@
       pid: 42,
       reallyExit: (exitCode: number) => {
         postMessage({ f: "EXIT", x: exitCode });
-        while (true)
+        // while (true)
           ; // TODO smarter spin wait? maybe some sync-IO stuff?
         // don't allow any further execution (not caller, but also no timers etc.)
       },
@@ -858,7 +882,8 @@
       }
     };
     Object.setPrototypeOf(process, {});
-
+//@ts-ignore
+    // fs2
     const bootstrapper = new ContextifyScript(natives["internal/bootstrap_node"], { displayErrors: true, filename: "internal/bootstrap_node", lineOffset: 0 });
     const bootstrap = bootstrapper.runInThisContext();
     try {

@@ -58,11 +58,17 @@ class VirtualMachine {
     document.getElementById("stderr")!.textContent = "";
     this.terminal.clear();
     const vm = this;
+    const fs1 = this.fs
     const worker = new Worker("/bin/node/app.js");
     if (keepAlive) (self as any)._keepAlive = worker;
     worker.onmessage = function (ev: MessageEvent) { const { f, x } = ev.data; vm.syscall(this, f, x); };
     // worker.onerror = function (ev: ErrorEvent) { console.error(JSON.stringify(ev, null, 2)); };
-    const env: Environment = { fs: this.fs, cwd: "/cwd" };
+    //@ts-ignore
+    const fs2 = fs;
+    // const fs2 = require("fs");
+    // console.log(fs2)
+    
+    const env: Environment = { fs: fs1, cwd: "/cwd", };
     worker.postMessage({ type: "start", args, env });
 
     this.terminal.onData((ch: string) => {
@@ -98,6 +104,10 @@ class VirtualMachine {
   }
 }
 
+const virtualMachine = new VirtualMachine({
+  //  "/mnt/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY
+  //  "/home/runner/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY
+}, terminal)
 function dragover_handler(ev: DragEvent) {
   ev.preventDefault();
   ev.dataTransfer!.dropEffect = "link";
@@ -175,7 +185,13 @@ function load() {
   (document.body as any).onresize = resize;
   setInterval(resize, 500);
 
-  new VirtualMachine({ /* "/home/runner/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY */ }, terminal).node([], false)
-  // new VirtualMachine({}, terminal).node(["node_modules/npm", "install", "--no-save", "semver"], false)
+  // virtualMachine.node(
+    // ["node_modules/npm", "install", "--no-save", "semver"],
+    // false
+  // );
+  // virtualMachine.node([],false)
+  new VirtualMachine({}, terminal).node(["node_modules/npm", "install", "--no-save", "semver"], false)
+  // virtualMachine.node(["node_modules/npm", "help"], false)
   // new VirtualMachine({}, terminal).node(["node_modules/npm", "help"], false)
 }
+

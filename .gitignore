@@ -4,7 +4,5 @@ www/mnt/node_modules/*
 test/browserRunner/node_modules/*
 npm-debug.log
 exec.bash
-www/node/*
-www/node
 www/browserfs
 www/browserfs/*

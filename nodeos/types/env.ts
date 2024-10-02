@@ -3,4 +3,5 @@
 interface Environment {
   fs: VirtualFileSystem;
   cwd: string;
+  // fs2:VirtualFileSystem
 }
