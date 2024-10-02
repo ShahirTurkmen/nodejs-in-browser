@@ -6,3 +6,5 @@ npm-debug.log
 exec.bash
 www/node/*
 www/node
+www/browserfs
+www/browserfs/*
