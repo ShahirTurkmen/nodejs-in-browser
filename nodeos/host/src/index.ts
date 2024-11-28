@@ -5,7 +5,8 @@
 
 const terminal = new Terminal({
   cursorBlink: true,
-  cols: 120, rows: 30,
+  cols: 120,
+  rows: 30,
   convertEol: true,
 });
 
@@ -14,9 +15,10 @@ const terminal = new Terminal({
  * Can host multiple workers that will have a consistent view of the FS, process.arch, etc.
  */
 class VirtualMachine {
-  public constructor(private fs: VirtualFileSystem, private terminal: Terminal) {
-
-  }
+  public constructor(
+    private fs: VirtualFileSystem,
+    private terminal: Terminal
+  ) {}
 
   private syscall(origin: Worker, func: string, arg: any): void {
     switch (func) {
@@ -31,8 +33,7 @@ class VirtualMachine {
       case "error":
         this.terminal.write("[Runtime Error]\n");
         this.terminal.write(arg + "\n");
-        if (arg.stack)
-          this.terminal.write(arg.stack + "\n");
+        if (arg.stack) this.terminal.write(arg.stack + "\n");
         break;
       // case "__trace.fs":
       // case "__trace.require":
@@ -58,24 +59,25 @@ class VirtualMachine {
     document.getElementById("stderr")!.textContent = "";
     this.terminal.clear();
     const vm = this;
-    const fs1 = this.fs
+    const fs1 = this.fs;
     const worker = new Worker("/bin/node/app.js");
     if (keepAlive) (self as any)._keepAlive = worker;
-    worker.onmessage = function (ev: MessageEvent) { const { f, x } = ev.data; vm.syscall(this, f, x); };
+    worker.onmessage = function (ev: MessageEvent) {
+      const { f, x } = ev.data;
+      vm.syscall(this, f, x);
+    };
     // worker.onerror = function (ev: ErrorEvent) { console.error(JSON.stringify(ev, null, 2)); };
     //@ts-ignore
-    const fs2 = fs;
-    // const fs2 = require("fs");
-    // console.log(fs2)
-    
-    const env: Environment = { fs: fs1, cwd: "/cwd", };
+
+    const env: Environment = { fs: fs1, cwd: "/cwd" };
     worker.postMessage({ type: "start", args, env });
 
     this.terminal.onData((ch: string) => {
-      if (ch.length > 8) { // assume paste (TODO: clean, see VSCode recent developments)
+      if (ch.length > 8) {
+        // assume paste (TODO: clean, see VSCode recent developments)
         worker.postMessage({
           type: "stdin",
-          ch: ch
+          ch: ch,
         });
       }
       if (ch.length === 1) {
@@ -97,17 +99,31 @@ class VirtualMachine {
           ctrl: domEvent.ctrlKey,
           shift: domEvent.shiftKey,
           meta: domEvent.metaKey,
-          alt: domEvent.altKey
-        }
+          alt: domEvent.altKey,
+        },
       });
     });
   }
 }
-
-const virtualMachine = new VirtualMachine({
-  //  "/mnt/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY
-  //  "/home/runner/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY
-}, terminal)
+async function fetch123() {
+  const res = await fetch("/mnt/node_modules/chalk/templates.js")
+  const data = res.arrayBuffer()
+ let temp1 = new Uint8Array(await data);
+  console.log(temp1)
+  const virtualMachine = new VirtualMachine(
+    {
+    "/mnt/node_modules/chalk/templates.js": temp1
+    //  "/mnt/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY
+    //  "/home/runner/.node_repl_history": new Uint8Array() // disabled via NODE_REPL_HISTORY
+  },
+  terminal
+);
+  return {
+    virtualMachine,
+    temp1
+  }
+  //@ts-ignore
+}
 function dragover_handler(ev: DragEvent) {
   ev.preventDefault();
   ev.dataTransfer!.dropEffect = "link";
@@ -123,8 +139,8 @@ async function drop_handler(ev: DragEvent) {
     if (entry.isFile) {
       // Get file
       try {
-        await new Promise<void>((res, req) => entry.file(
-          (f: File) => {
+        await new Promise<void>((res, req) =>
+          entry.file((f: File) => {
             todo.add(name);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -135,28 +151,30 @@ async function drop_handler(ev: DragEvent) {
             };
             reader.onerror = () => console.error(name);
             reader.readAsArrayBuffer(f);
-          },
-          req)
+          }, req)
         );
-      } catch (e) { console.error(`Error loading '${name}'`) }
+      } catch (e) {
+        console.error(`Error loading '${name}'`);
+      }
     } else if (entry.isDirectory) {
       fs[name] = null;
       // Get folder contents
       const dirReader = entry.createReader();
       const jobs: Promise<void>[] = [];
-      await new Promise<void>(res => dirReader.readEntries((entries: any) => {
-        for (var i = 0; i < entries.length; i++)
-          jobs.push(traverse(entries[i], name + "/"));
-        res();
-      }));
+      await new Promise<void>((res) =>
+        dirReader.readEntries((entries: any) => {
+          for (var i = 0; i < entries.length; i++)
+            jobs.push(traverse(entries[i], name + "/"));
+          res();
+        })
+      );
       await Promise.all(jobs);
     }
   };
   var items = ev.dataTransfer!.items;
   for (var i = 0; i < items.length; ++i) {
     const item = items[i];
-    if (item.kind != "file")
-      continue;
+    if (item.kind != "file") continue;
     await traverse(item.webkitGetAsEntry(), "/");
   }
 
@@ -165,10 +183,13 @@ async function drop_handler(ev: DragEvent) {
   if (!firstPath) return;
 
   const vm = new VirtualMachine(fs, terminal);
-  const start = (args: string[], keepAlive: boolean) => { console.log(args); vm.node(args, keepAlive); };
+  const start = (args: string[], keepAlive: boolean) => {
+    console.log(args);
+    vm.node(args, keepAlive);
+  };
   (self as any).node = (...args: string[]) => start(args, false);
   (self as any).nodeDebug = (...args: string[]) => start(args, true);
-  start(["/" + firstPath.split('/')[1]], false);
+  start(["/" + firstPath.split("/")[1]], false);
 }
 function load() {
   const terminalDiv = document.getElementById("xterm") as HTMLElement;
@@ -178,20 +199,25 @@ function load() {
     const cw = term._core._renderService.dimensions.actualCellWidth;
     const ch = term._core._renderService.dimensions.actualCellHeight;
     if (cw && ch)
-      terminal.resize(terminalDiv.clientWidth / cw | 0, terminalDiv.clientHeight / ch | 0);
+      terminal.resize(
+        (terminalDiv.clientWidth / cw) | 0,
+        (terminalDiv.clientHeight / ch) | 0
+      );
     // TODO: need to communicate that to process!
   };
-  terminal.onTitleChange(title => document.title = title); // console.log(`${String.fromCharCode(27)}]0;${title}${String.fromCharCode(7)}`)
+  terminal.onTitleChange((title) => (document.title = title)); // console.log(`${String.fromCharCode(27)}]0;${title}${String.fromCharCode(7)}`)
   (document.body as any).onresize = resize;
   setInterval(resize, 500);
 
   // virtualMachine.node(
-    // ["node_modules/npm", "install", "--no-save", "semver"],
-    // false
+  // ["node_modules/npm", "install", "--no-save", "semver"],
+  // false
   // );
-  // virtualMachine.node([],false)
-  new VirtualMachine({}, terminal).node(["node_modules/npm", "install", "--no-save", "semver"], false)
+  fetch123().then((v) => {
+  const virtualMachine= v.virtualMachine
+    virtualMachine.node([""], false);
+  });
+  // new VirtualMachine({}, terminal).node(["node_modules/npm", "install", "--no-save", "semver"], false)
   // virtualMachine.node(["node_modules/npm", "help"], false)
   // new VirtualMachine({}, terminal).node(["node_modules/npm", "help"], false)
 }
-

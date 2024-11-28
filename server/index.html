@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Directory Walker with ZenFS</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        margin: 5px 0;
+      }
+      a {
+        text-decoration: none;
+        color: blue;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Directory Walker with ZenFS</h1>
+    <ul id="file-list"></ul>
+    <script>
+      const apiUrl = "http://localhost:8081/api/dir/mnt"; // Your server's API endpoint
+      const zenFs = {}; // Mock ZenFS structure
+
+      async function fetchDirectory(url) {
+        console.log(`Fetching directory: ${url}`);
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+          const contents = await response.json();
+          console.log("Directory contents:", contents); // Debugging line
+          displayFiles(contents);
+        } catch (error) {
+          console.error("Fetch error:", error);
+          alert("Failed to load directory contents.");
+        }
+      }
+
+      function navigate(itemPath) {
+        console.log(`Navigating to: ${itemPath}`);
+        fetchDirectory(`${apiUrl}${itemPath}`);
+      }
+
+      function normalizePath(path) {
+        return path.replace(/\/+/g, "/").replace(/\/$/, ""); // Normalize to a single slash and remove trailing slash
+      }
+     
+      function displayFiles(contents, currentPath = "/") {
+        const parentElement = document.getElementById("file-list");
+        parentElement.innerHTML = ""; // Clear previous contents
+
+        contents.forEach((item) => {
+          const normalizedPath = normalizePath(currentPath + item.name);
+          const li = document.createElement("li");
+
+          if (item.isDirectory) {
+            li.innerHTML = `<a href="#" onclick="navigate('${normalizedPath}')">${item.name}/</a>`;
+            saveToZenFS(normalizedPath, {}); // Save directory as an empty object
+            // Recursively display the files in this directory
+            displayFiles(item.contents, normalizedPath + "/");
+          } else {
+            li.innerHTML = `<span>${item.name}</span>`; // Just display the file name
+            saveToZenFS(normalizedPath, item.fileContent); // Save file content
+          }
+          parentElement.appendChild(li);
+        });
+      }
+      function saveToZenFS(filePath, fileContent) {
+        const pathParts = filePath.split("/").filter((part) => part);
+        let current = zenFs;
+
+        pathParts.forEach((part, index) => {
+          const normalizedPart = normalizeName(part);
+          if (!current[normalizedPart]) {
+            if (index === pathParts.length - 1) {
+              // We're at the final part, save the file content
+              current[normalizedPart] = fileContent;
+            //   zenfs.writeFileSync(filePath, fileContent); // Call to write the file
+            } else {
+              // Not the last part, create a new directory
+              current[normalizedPart] = {};
+            }
+          }
+          current = current[normalizedPart];
+        });
+
+        console.log(`Saved to ZenFS at ${filePath}:`, zenFs);
+      }
+      // function saveToZenFS(filePath, fileContent) {
+      //     const pathParts = filePath.split('/').filter(part => part);
+      //     let current = zenFs;
+
+      //     pathParts.forEach((part, index) => {
+      //         const normalizedPart = normalizeName(part);
+      //         if (!current[normalizedPart]) {
+      //             // If it's the last part, save file content; otherwise create an empty object for directories
+      //             current[normalizedPart] = index === pathParts.length - 1 ? fileContent : {};
+      //         }
+      //         current = current[normalizedPart];
+      //     });
+
+      //     console.log(`Saved to ZenFS at ${filePath}:`, zenFs);
+      // }
+
+      function normalizeName(name) {
+        return name.replace(/[^\w.-]/g, "_"); // Normalize name by replacing invalid characters
+      }
+
+      // Initial fetch to load the root directory
+      fetchDirectory(apiUrl);
+    </script>
+  </body>
+</html>

@@ -24,7 +24,7 @@
 const Buffer = require('buffer').Buffer;
 const Transform = require('_stream_transform');
 const { _extend } = require('util');
-const binding = require("zlib.pretty");
+const binding = require("internal/zlib/binding");
 // const binding = process.binding('zlib');
 const assert = require('assert').ok;
 const kMaxLength = require('buffer').kMaxLength;
@@ -648,7 +648,7 @@ module.exports = {
   DeflateRaw,
   InflateRaw,
   Unzip,
-
+  binding,
   // Convenience methods.
   // compress/decompress a string or buffer in one step.
   deflate: createConvenienceMethod(Deflate, false),
@@ -664,7 +664,7 @@ module.exports = {
   gunzip: createConvenienceMethod(Gunzip, false),
   gunzipSync: createConvenienceMethod(Gunzip, true),
   inflateRaw: createConvenienceMethod(InflateRaw, false),
-  inflateRawSync: createConvenienceMethod(InflateRaw, true)
+  inflateRawSync: createConvenienceMethod(InflateRaw, true),
 };
 
 Object.defineProperties(module.exports, {

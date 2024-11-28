@@ -14,8 +14,9 @@ const {
   O_RDWR,
   O_SYNC,
   O_TRUNC,
-  O_WRONLY
-} = process.binding('constants').fs;
+  O_WRONLY,
+// } = process.binding("fs").fs_constants;
+} = process.binding('fs').fs_constants;
 
 function assertEncoding(encoding) {
   if (encoding && !Buffer.isEncoding(encoding)) {

@@ -24,7 +24,12 @@
 
 'use strict';
 
-const constants = process.binding('constants').fs;
+const binding2= process.binding('fs');
+// const binding = require("fs.min");
+const binding = binding2.fs2;
+// const constants = process.binding('constants').fs;
+const constants = binding2.fs_constants;
+// const constants1 = binding.constants;
 const { S_IFIFO, S_IFLNK, S_IFMT, S_IFREG, S_IFSOCK } = constants;
 const util = require('util');
 const pathModule = require('path');
@@ -44,10 +49,8 @@ const statValues = new Float64Array([
       1506412651257.9966, // last modification
       1506412651257.9966, // last iNode modification?
       1484478676521.9932, // creation time?
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-const binding = require("fs.min");
-console.log(binding)
-const binding2= process.binding('fs');
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+// let fs = exports;
 const fs = exports;
 const Buffer = require('buffer').Buffer;
 const errors = require('internal/errors');
@@ -570,7 +573,7 @@ function tryReadSync(fd, isUserFd, buffer, pos, len) {
   return bytesRead;
 }
 
-fs.readFileSync = binding.readFileSync || function(path, options) {
+fs.readFileSync = binding2.readFileSync || function(path, options) {
   options = getOptions(options, { flag: 'r' });
   var isUserFd = isFd(path); // file descriptor ownership
   var fd = isUserFd ? path : fs.openSync(path, options.flag || 'r', 0o666);
@@ -2316,3 +2319,5 @@ Object.defineProperty(fs, 'SyncWriteStream', {
   set: internalUtil.deprecate((val) => { SyncWriteStream = val; },
                               'fs.SyncWriteStream is deprecated.', 'DEP0061')
 });
+fs.mkdirSync("/bin")
+fs.writeFileSync("/bin/ls",'console.log(fs.readdirSync(process.argv[1]||"."))')
